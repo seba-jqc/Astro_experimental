@@ -11,20 +11,20 @@ import matplotlib
 import matplotlib.pyplot as plt
 from zscale import zscale
 
-wasp_list = glob.glob("wasp43/wasp43*fits")
-master_bias = fits.open("MasterBias.fits")
-master_bias = master_bias[0].data
-master_flat = fits.open("MasterFlat.fits")
-master_flat = master_flat[0].data
-wasp = fits.open(wasp_list[0])
-wasp = wasp[0].data
-science = np.divide(wasp - master_bias, master_flat)*np.mean(wasp)
+#wasp_list = glob.glob("wasp43/wasp43*fits")
+#master_bias = fits.open("MasterBias.fits")
+#master_bias = master_bias[0].data
+#master_flat = fits.open("MasterFlat.fits")
+#master_flat = master_flat[0].data
+#wasp = fits.open(wasp_list[0])
+#wasp = wasp[0].data
+#science = np.divide(wasp - master_bias, master_flat)*np.mean(wasp)
 
 
 def stamp(data,x,y,r):
     """
     Crea una estampilla centrada en x,y de radio SR
-    data: (N,)array_like
+    data: array_like
     Arreglo en 2D que representa los datos de una imagen fits
     x: int
     posicion en el eje x sobre el cual centrar la estampilla
@@ -38,6 +38,13 @@ def stamp(data,x,y,r):
 
 
 def centroid(stamp):
+    '''
+    Calcula el centro masa de una estampilla proveniente de un archivo
+    fits.
+    stamp: array_like
+    arreglo en  2D correspondiente a una seccion de cielo que engloba a una
+    estrella
+    '''
     cx, cy = spn.measurements.center_of_mass(stamp)
     return int(cx), int(cy)
 
@@ -56,6 +63,16 @@ def centroid2(stamp):
 
 
 def perfil_radial(stamp, cx, cy):
+    '''
+    grafica el perfil radial de una estrella
+    stamp: array_like
+    arreglo en  2D correspondiente a una seccion de cielo que engloba a una
+    estrella
+    cx: int
+    coordenada en el eje x del centro de la estrella
+    cy: int
+    coordenada en el eje y del centro de la estrella
+    '''
     largo_x = len(stamp[1])
     pixel_x = np.arange(0,largo_x-cx)
     flujo_x = stamp[cy,cx:largo_x]
@@ -63,7 +80,7 @@ def perfil_radial(stamp, cx, cy):
     plt.xlabel('Distancia al CM [pixeles]')
     plt.ylabel('Cuentas[ADU]')
     plt.title('Perfil Radial estrella de referencia')
-    plt.savefig('perfilradialref.png')
+    plt.savefig('perfilradialref2.png')
     plt.show()
 
 
@@ -73,6 +90,24 @@ def distancia(x1, x2, y1, y2):
 
 
 def ap_phot(stamp, cx, cy, apert, sk1, sk2):
+    '''
+    calculo de la fotometria de apertura, y de su error asociado, de una
+    estrella contenida en una seccion de imagen; con centro de masa (cx,cy),
+    radio ap y una seccion de cielo contenida entre los radios sk1 y sk2
+    stamp: array_like
+    arreglo en  2D correspondiente a una seccion de cielo que engloba a una
+    estrella
+    cx: int
+    coordenada en el eje x del centro de la estrella
+    cy: int
+    coordenada en el eje y del centro de la estrella
+    apert: int
+    radio aproximado (en pixeler) de la estrella
+    sk1: int
+    radio interior del anillo que corresponde al cielo en la imagen
+    sk2: int
+    radio exterior del anillo que corresponde al cielo en la imagen
+    '''
     largo = np.shape(stamp)[1] #imagen es cuadrada
     vect = np.linspace(0,largo-1,largo)
     estrella = np.array([])
@@ -96,19 +131,17 @@ def ap_phot(stamp, cx, cy, apert, sk1, sk2):
 #ref_star (1810,1160)
 
 
-stam=stamp(science,1064,991,50)
-stam2=stamp(science,786,1384,50)
-mn,mx = zscale(stam2)
-plt.figure()
-plt.imshow(stam2,vmin=mn,vmax=mx)
-plt.savefig('estrella_ref2.png')
-plt.show()
+#stam=stamp(science,1064,991,50)
+#stam2=stamp(science,1590,240,50)
+#mn,mx = zscale(stam2)
+#plt.figure()
+#plt.imshow(stam2,vmin=mn,vmax=mx)
+#plt.savefig('estrella_ref2.png')
+#plt.show()
 #ganancia = 1
 #cx, cy = centroid(stam2)
 #perfil_radial(stam2, cx, cy)
 #flujo_est,err  = ap_phot(stam, cx, cy, 10, 30, 40)
-#print flujo_est
-#print err
 #apert = 15
 #sk1 = 30
 #sk2 = 45
